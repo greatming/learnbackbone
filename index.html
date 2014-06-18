@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script type="text/javascript" src="http://underscorejs.org/underscore-min.js"></script>
+    <script type="text/javascript" src="http://backbonejs.org/backbone-min.js"></script>
+    <script type="text/javascript" src="./backbone.localStorage.js"></script>
+</head>
+<body>
+<ul id="list"></ul>
+<div id="add">添加</div>
+</body>
+<script type="text/javascript">
+    Backbone.emulateHTTP = true;
+    var obj = {};
+    obj.User = Backbone.Model.extend({});
+    obj.Users = Backbone.Collection.extend({
+        model:obj.User
+    });
+
+    var list = new obj.Users([
+        {name:'hmreal'},
+        {name:'kaka'},
+        {name:'ronaldo'},
+        {name:'beckham'}
+    ]);
+
+    obj.User.View = Backbone.View.extend({
+        tagName:'li',
+        render:function(){
+            this.$el.text(this.model.get('name'));
+
+            this.parentView.$el.append(this.$el);
+            return this;
+        }
+    });
+
+    obj.Users.View = Backbone.View.extend({
+        el:'#list',
+        initialize:function(){
+            _.bindAll(this,"render");
+            this.collection.on("add",this.render);
+            this.render();
+        },
+        render:function(){
+            this.$el.empty();
+            var thisView = this;
+            this.collection.each(function(user){
+                var liView = new obj.User.View({
+                    model:user
+                });
+                liView.parentView = thisView;
+                liView.render();
+            });
+            return this;
+        }
+    });
+    var UsersView = new obj.Users.View({
+        collection:list
+    })
+    $("#add").click(function(){
+        list.add({name:"zidane"});
+    })
+
+    var TestModel = Backbone.Model.extend({
+        url:"./test.php"
+    })
+
+    var test = new TestModel({
+        name:"hmreal"
+    });
+    test.fetch({name:"haoming"});
+
+</script>
+</html>
